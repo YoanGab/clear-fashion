@@ -32,7 +32,8 @@ console.log(MY_FAVORITE_BRANDS[0]);
 // I can find on these e-shops
 // 2. Log the variable
 
-
+const Cheapest = 'https://hopaal.com/collections/homme/products/classique-noir-t-shirt-homme?variant=39629285949624'
+console.log(Cheapest)
 
 
 
@@ -48,18 +49,25 @@ console.log(MY_FAVORITE_BRANDS[0]);
 // 🎯 TODO: Number of products
 // 1. Create a variable and assign it the number of products
 // 2. Log the variable
-
+const NumberOfProducts = marketplace.length
+console.log(NumberOfProducts)
 
 // 🎯 TODO: Brands name
 // 1. Create a variable and assign it the list of brands name only
 // 2. Log the variable
 // 3. Log how many brands we have
-
+const brandsName = new Set()
+marketplace.forEach(product => brandsName.add(product.brand))
+console.log(brandsName)
 
 // 🎯 TODO: Sort by price
 // 1. Create a function to sort the marketplace products by price
 // 2. Create a variable and assign it the list of products by price from lowest to highest
 // 3. Log the variable
+
+const priceSort = marketplace.sort((x,y)=> x.price-y.price)
+console.log(priceSort)
+
 
 
 // 🎯 TODO: Sort by date
@@ -68,16 +76,21 @@ console.log(MY_FAVORITE_BRANDS[0]);
 // 3. Log the variable
 
 
+const dateSort = marketplace.sort((x,y)=> x.date-y.date)
+console.log(dateSort)
+
 // 🎯 TODO: Filter a specific price range
 // 1. Filter the list of products between 50€ and 100€
 // 2. Log the list
 
-
+console.log(marketplace.filter(product => product.price <= 100 & product.price>=50))
 // 🎯 TODO: Average price
 // 1. Determine the average price of the marketplace
 // 2. Log the average
 
-
+var sum = 0;
+marketplace.forEach(product => sum += product.price)
+console.log(sum/marketplace.length)
 
 
 
@@ -93,6 +106,23 @@ console.log(MY_FAVORITE_BRANDS[0]);
 // The key is the brand name
 // The value is the array of products
 //
+
+const brands = {};
+brandsName.forEach(name => {
+  brands[name] = [];
+  marketplace.forEach(product => 
+    {
+      if(name==product.brand)
+    {
+      brands[name].push(product)
+    }
+  })
+})
+
+
+
+
+
 // Example:
 // const brands = {
 //   'brand-name-1': [{...}, {...}, ..., {...}],
@@ -103,18 +133,26 @@ console.log(MY_FAVORITE_BRANDS[0]);
 //
 // 2. Log the variable
 // 3. Log the number of products by brands
-
+console.log(brands)
+for(var brand in brands){
+  console.log(`${brand} has length ${brands[brand].length}`)
+}
 
 // 🎯 TODO: Sort by price for each brand
 // 1. For each brand, sort the products by price, from highest to lowest
 // 2. Log the sort
-
+console.log('brands sort sort by price')
+for(var brand in brands){
+  console.log(brands[brand].sort((x,y)=> x.price-y.price))
+}
 
 // 🎯 TODO: Sort by date for each brand
 // 1. For each brand, sort the products by date, from old to recent
 // 2. Log the sort
-
-
+console.log('brands sort sort by date')
+for(var brand in brands){
+  console.log(brands[brand].sort((x,y)=> x.date-y.date))
+}
 
 
 
@@ -129,7 +167,21 @@ console.log(MY_FAVORITE_BRANDS[0]);
 // 1. Compute the p90 price value of each brand
 // The p90 value (90th percentile) is the lower value expected to be exceeded in 90% of the products
 
+function percentile(sortedArray, p) {
 
+  var index = p * sortedArray.length
+  index = Math.round(index)
+  var p90 = sortedArray[index].price
+  return p90
+}
+
+
+const p90Values = []
+for (const brand in brands) {
+  p90Values[brand] = percentile(brands[brand].sort((x,y)=> x.price-y.price), 0.90)
+}
+console.log("p90 values for each brand:")
+console.log(p90Values)
 
 
 
