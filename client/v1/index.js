@@ -256,22 +256,40 @@ const COTELE_PARIS = [
 // 🎯 TODO: New released products
 // // 1. Log if we have new products only (true or false)
 // // A new product is a product `released` less than 2 weeks.
-
+var newOnly = true;
+COTELE_PARIS.forEach(product => {
+  if(product.released <="2021-02-01")
+  {
+    newOnly = false;
+  }
+})
+console.log(`new : ${newOnly}`)
 
 // 🎯 TODO: Reasonable price
 // // 1. Log if coteleparis is a reasonable price shop (true or false)
 // // A reasonable price if all the products are less than 100€
-
+var reasonable = true;
+COTELE_PARIS.forEach(product => {
+  if(product.price <=100)
+  {
+    reasonable = false;
+  }
+})
+console.log(`reasonable : ${reasonable}`)
 
 // 🎯 TODO: Find a specific product
 // 1. Find the product with the uuid `b56c6d88-749a-5b4c-b571-e5b5c6483131`
 // 2. Log the product
 
-
+const foundProduct = COTELE_PARIS.find(product => product.uuid == 'b56c6d88-749a-5b4c-b571-e5b5c6483131')
+console.log(foundProduct)
 // 🎯 TODO: Delete a specific product
 // 1. Delete the product with the uuid `b56c6d88-749a-5b4c-b571-e5b5c6483131`
 // 2. Log the new list of product
-
+let listAfterRemove = COTELE_PARIS.filter((product) => {
+  return product.uuid !== "b56c6d88-749a-5b4c-b571-e5b5c6483131";
+});
+console.log(listAfterRemove);
 // 🎯 TODO: Save the favorite product
 let blueJacket = {
   'link': 'https://coteleparis.com/collections/tous-les-produits-cotele/products/la-veste-bleu-roi',
@@ -287,7 +305,10 @@ jacket.favorite = true;
 
 // 1. Log `blueJacket` and `jacket` variables
 // 2. What do you notice?
+console.log(blueJacket)
+console.log(jacket)
 
+//We notice that the favourite has been applied to both the blueJacket and jacket variables
 blueJacket = {
   'link': 'https://coteleparis.com/collections/tous-les-produits-cotele/products/la-veste-bleu-roi',
   'price': 110,
@@ -297,9 +318,10 @@ blueJacket = {
 // 3. Update `jacket` property with `favorite` to true WITHOUT changing blueJacket properties
 
 
-
-
-
+jacket = {...blueJacket}
+jacket.favorite = true;
+console.log(blueJacket)
+console.log(jacket)
 /**
  * 🎬
  * The End
@@ -309,3 +331,6 @@ blueJacket = {
 // 🎯 TODO: Save in localStorage
 // 1. Save MY_FAVORITE_BRANDS in the localStorage
 // 2. log the localStorage
+localStorage.setItem('MY_FAVORITE_BRANDS', JSON.stringify(MY_FAVORITE_BRANDS));
+console.log(localStorage);
+console.log(JSON.parse(localStorage.getItem('MY_FAVORITE_BRANDS')));
