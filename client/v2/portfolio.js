@@ -96,8 +96,8 @@ const renderProducts = products => {
             return `
               <div class="product" id=${product.uuid}>
                 <span>${product.brand}</span>
-                <a href="${product.link}">${product.name}</a>
-                <span>${product.price}</span>
+                <a href="${product.link}" target="_blank" rel="noopener noreferrer">${product.name}</a>
+                <span>${product.price}$</span>
               </div>
             `;
         })
