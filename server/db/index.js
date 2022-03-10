@@ -43,6 +43,9 @@ module.exports.insert = async products => {
     const collection = db.collection(MONGODB_COLLECTION);
     // More details
     // https://docs.mongodb.com/manual/reference/method/db.collection.insertMany/#insert-several-document-specifying-an-id-field
+    products.forEach(product => {
+      product.date = new Date();
+    });
     const result = await collection.insertMany(products, {'ordered': false});
 
     return result;
@@ -83,3 +86,81 @@ module.exports.close = async () => {
     console.error('🚨 MongoClient.close...', error);
   }
 };
+
+
+/**
+ * Get all products of a brand
+ * @param  {String}  brand
+ */
+module.exports.getProductsByBrand = async brand => {
+  try {
+    const db = await getDB();
+    const collection = db.collection(MONGODB_COLLECTION);
+    return await collection.find({'brand': brand}).toArray();
+  } catch (error) {
+    console.error('🚨 collection.find...', error);
+    return null;
+  }
+};
+
+
+/**
+ * Get all products less than a price
+ * @param  {Number}  price
+ */
+module.exports.getProductsLessThanPrice = async price => {
+  try {
+    const db = await getDB();
+    const collection = db.collection(MONGODB_COLLECTION);
+    return await collection.find({'price': {'$lt': price}}).toArray();
+  } catch (error) {
+    console.error('🚨 collection.find...', error);
+    return null;
+  }
+};
+
+
+/**
+ * Find all products sorted by price
+ */
+module.exports.getProductsSortedByPrice = async () => {
+  try {
+    const db = await getDB();
+    const collection = db.collection(MONGODB_COLLECTION);
+    return await collection.find().sort({'price': 1}).toArray();
+  } catch (error) {
+    console.error('🚨 collection.find...', error);
+    return null;
+  }
+};
+
+
+/**
+ * Find all products sorted by date
+ */
+module.exports.getProductsSortedByDate = async () => {
+  try {
+    const db = await getDB();
+    const collection = db.collection(MONGODB_COLLECTION);
+    return await collection.find().sort({'date': -1}).toArray();
+  } catch (error) {
+    console.error('🚨 collection.find...', error);
+    return null;
+  }
+};
+
+
+/**
+ * Find all products scraped less than 2 weeks
+ */
+module.exports.getProductsScrapedLessThan2Weeks = async () => {
+  try {
+    const db = await getDB();
+    const collection = db.collection(MONGODB_COLLECTION);
+    return await collection.find({'date': {'$gt': new Date(Date.now() - 1000 * 60 * 60 * 24 * 14)}}).toArray();
+  } catch (error) {
+    console.error('🚨 collection.find...', error);
+    return null;
+  }
+};
+
