@@ -4,7 +4,7 @@ const fs = require('fs');
 
 const MONGODB_DB_NAME = 'clearfashion';
 const MONGODB_COLLECTION = 'products';
-const MONGODB_URI = process.env.MONGODB_URI;
+const MONGODB_URI = 'mongodb+srv://dia3-group9:8qrsHFMm@cluster0.cncvk.mongodb.net/myFirstDatabase?retryWrites=true&w=majority';
 
 let client = null;
 let database = null;
@@ -46,9 +46,8 @@ module.exports.insert = async products => {
         products.forEach(product => {
             product.date = new Date();
         });
-        const result = await collection.insertMany(products, {'ordered': false});
 
-        return result;
+        return await collection.insertMany(products, {'ordered': false});
     } catch (error) {
         console.error('🚨 collection.insertMany...', error);
         fs.writeFileSync('products.json', JSON.stringify(products));
@@ -89,6 +88,7 @@ module.exports.close = async () => {
 /**
  * Get all products of a brand
  * @param  {String}  brand
+ * @return {Array}
  */
 module.exports.getProductsByBrand = async brand => {
     try {
@@ -105,6 +105,7 @@ module.exports.getProductsByBrand = async brand => {
 /**
  * Get all products less than a price
  * @param  {Number}  price
+ * @return {Array}
  */
 module.exports.getProductsLessThanPrice = async price => {
     try {
@@ -120,6 +121,7 @@ module.exports.getProductsLessThanPrice = async price => {
 
 /**
  * Find all products sorted by price
+ * @return {Array}
  */
 module.exports.getProductsSortedByPrice = async () => {
     try {
@@ -135,6 +137,7 @@ module.exports.getProductsSortedByPrice = async () => {
 
 /**
  * Find all products sorted by date
+ * @return {Array}
  */
 module.exports.getProductsSortedByDate = async () => {
     try {
@@ -150,6 +153,7 @@ module.exports.getProductsSortedByDate = async () => {
 
 /**
  * Find all products scraped less than 2 weeks
+ * @return {Array}
  */
 module.exports.getProductsScrapedLessThan2Weeks = async () => {
     try {
@@ -166,6 +170,7 @@ module.exports.getProductsScrapedLessThan2Weeks = async () => {
 /**
  * Find product by id
  * @param  {String}  id
+ * @return {Object}
  */
 module.exports.getProductById = async id => {
     try {
@@ -184,8 +189,11 @@ module.exports.getProductById = async id => {
  * @param  {Number}  limit
  * @param  {String}  brand
  * @param  {Number}  price
+ * @param  {Number}  page
+ * @param  {String}  sort
+ * @return {Array}
  */
-module.exports.getProducts = async (limit, brand, price) => {
+module.exports.getProducts = async (limit, brand, price, page, sort) => {
     try {
         const db = await getDB();
         const collection = db.collection(MONGODB_COLLECTION);
@@ -196,9 +204,62 @@ module.exports.getProducts = async (limit, brand, price) => {
         if (price !== -1) {
             query['price'] = {'$lt': price};
         }
-        return await collection.find(query).limit(limit).toArray();
+        let offset = (page - 1) * limit;
+        let products = await collection.find(query)
+        switch(sort) {
+            case 'price-asc':
+                products = await products.sort({'price': 1}).toArray();
+                break;
+            case 'price-desc':
+                products = await products.sort({'price': -1}).toArray();
+                break;
+            case 'date-asc':
+                products = await products.sort({'date': 1}).toArray();
+                break;
+            case 'date-desc':
+                products = await products.sort({'date': -1}).toArray();
+                break;
+            default:
+                products = await products.sort({'price': -1}).toArray();
+                break;
+        }
+
+        let nbPages = Math.ceil(products.length / limit);
+        return {
+            success: true,
+            data: {
+                result: products.slice(offset, offset + limit),
+                meta: {
+                    currentPage: page,
+                    pageCount: nbPages,
+                    pageSize: limit,
+                    count: products.length
+                }
+            }
+        };
     } catch (error) {
         console.error('🚨 collection.find...', error);
         return null;
     }
 };
+
+
+/**
+ * Get all brands
+ * @return {Array}
+ */
+module.exports.getBrands = async () => {
+    try {
+        const db = await getDB();
+        const collection = db.collection(MONGODB_COLLECTION);
+        let brands = await collection.distinct('brand');
+        return {
+            success: true,
+            data: brands
+        };
+    } catch (error) {
+        console.error('🚨 collection.find...', error);
+        return null;
+    }
+};
+

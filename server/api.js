@@ -30,10 +30,21 @@ app.get('/products/search', (request, response) => {
         });
 });
 
+
 app.get('/products/:id', (request, response) => {
     service.getProductById(request.params.id)
         .then((product) => {
             response.send(product);
+        })
+        .catch((error) => {
+            response.status(500).send(error);
+        });
+});
+
+app.get('/brands', (request, response) => {
+    service.getBrands()
+        .then((brands) => {
+            response.send(brands);
         })
         .catch((error) => {
             response.status(500).send(error);
