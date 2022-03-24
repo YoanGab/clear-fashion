@@ -11,7 +11,7 @@ describe("db.getDB()", () => {
 describe("db.find()", () => {
   test("should return a list of all items", async () => {
     const items = await db.find({});
-    expect(items.length).toBe(105);
+    expect(items.length).toBe(129);
   });
 });
 
@@ -62,7 +62,7 @@ describe("db.getProductsSortedByDate()", () => {
   test("should return a list of products sorted by date", async () => {
     const products = await db.getProductsSortedByDate();
     for (let i = 0; i < products.length - 1; i++) {
-      expect(products[i].date <= products[i + 1].date).toBe(true);
+      expect(products[i].date >= products[i + 1].date).toBe(true);
     }
   });
 });
