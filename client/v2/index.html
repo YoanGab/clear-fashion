@@ -1,51 +1,212 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>👕 Clear Fahion | Environmentally & human-friendly clothes</title>
+    <meta charset="UTF-8">
+    <title>Clear Fashion</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6.26.0/babel.js"></script>
 </head>
 <body>
-<h1>Clear fashion</h1>
-<section id="options">
-    <div id="show">
-        <label for="show-select">Show:</label>
-        <select name="show" id="show-select">
-            <option value="12">12</option>
-            <option value="24">24</option>
-            <option value="48">48</option>
-        </select>
-    </div>
-    <div id="page">
-        <label for="page-select">Go to page:</label>
-        <select name="page" id="page-select"> </select>
-    </div>
-    <div id="filters">
-        <label for="max-price">Max Price: </label><input type="number" id="max-price">
-        <button id="max-price-button">Filter</button>
+<div id="app"></div>
 
-        <div id="brand">
-            <label for="brand-select">By brands:</label>
-            <select name="brand" id="brand-select"> </select>
-        </div>
-    </div>
-    <div id="sort">
-        <label for="sort-select">Sort:</label>
-        <select name="sort" id="sort-select">
-            <option value="price-asc">Cheaper</option>
-            <option value="price-desc">Expensive</option>
-            <option value="date-asc">Recently released</option>
-            <option value="date-desc">Anciently released</option>
-        </select>
-    </div>
-</section>
-<section id="indicators">
-    <h2>Indicators</h2>
-    <div>
-        <span>Number of products</span>
-        <span id="nbProducts">0</span>
-    </div>
-</section>
-<section id="products"></section>
-<script type="text/javascript" charset="UTF-8" src="portfolio.js"></script>
+<script type="text/babel">
+    class App extends React.Component {
+        constructor(props) {
+            super(props);
+            this.state = {
+                products: [],
+                maxPrice: -1,
+                sortBy: '',
+                brand: 'All brands',
+                limit: 12,
+                page: 1,
+                availableBrands: [],
+                totalPages: 0
+            };
+        }
+
+        componentDidMount() {
+            this.getProducts();
+            this.getBrands()
+        }
+
+        getProducts() {
+            fetch(`https://server-eta-henna.vercel.app/products/search?price=${this.state.maxPrice}&sort=${this.state.sortBy}&brand=${this.state.brand}&limit=${this.state.limit}&page=${this.state.page}`)
+                .then(res => res.json())
+                .then(res => this.setState({products: res.data.result, totalPages: res.data.meta.pageCount || 0}))
+                .catch(() => {
+                    window.location.reload()
+                });
+        }
+
+        getBrands() {
+            fetch(`https://server-eta-henna.vercel.app/brands`)
+                .then(res => res.json())
+                .then(res => this.setState({availableBrands: res.data}))
+        }
+
+        handleChange(event) {
+            if (event.target.name !== 'page') {
+                this.setState({page: 1});
+            }
+            this.setState({
+                [event.target.name]: event.target.value
+            }, () => {
+                this.getProducts();
+            });
+
+        }
+
+        render() {
+            return (
+                <div>
+                    <div className="container" style={{marginBottom: '20px'}}>
+                        <div className="row">
+                            <div className="col-md-12">
+                                <h1 className="text-center">Clear Fashion</h1>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="Container">
+                        <div className="row" style={{marginTop: '10px', marginLeft: '5px', marginRight: '5px', marginBottom: '10px'}}>
+                            <div className="col-sm-3">
+                                <Filter
+                                    maxPrice={this.state.maxPrice}
+                                    sortBy={this.state.sortBy}
+                                    brand={this.state.brand}
+                                    limit={this.state.limit}
+                                    page={this.state.page}
+                                    availableBrands={this.state.availableBrands}
+                                    availablePages={this.state.totalPages}
+                                    handleChange={this.handleChange.bind(this)}
+                                />
+                            </div>
+                            <div className="col-sm-9">
+                                <ProductList products={this.state.products}/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+    }
+
+    class Product extends React.Component {
+        render() {
+            return (
+                <tr>
+                    <td><a href={this.props.link}>{this.props.name}</a></td>
+                    <td>{this.props.price}</td>
+                    <td>{this.props.brand}</td>
+                    <td><img src={this.props.photo} width="50px" height="50px"/></td>
+                </tr>
+            );
+        }
+    }
+
+    class ProductList extends React.Component {
+        render() {
+            return (
+                <div className="panel panel-primary">
+                    <div className="panel-heading">
+                        <h3>Products</h3>
+                    </div>
+                    <div className="panel-body">
+                        <table className="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Price</th>
+                                    <th>Brand</th>
+                                    <th>Picture</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {this.props.products.map(
+                                    product => <Product
+                                        key={product._id}
+                                        name={product.name}
+                                        price={product.price}
+                                        brand={product.brand}
+                                        link={product.link}
+                                        photo={product.photo}
+                                    />
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            );
+        }
+    }
+
+    class Filter extends React.Component {
+        render() {
+            return (
+                <div className="panel panel-primary">
+                    <div className="panel-heading">
+                        <h3 className="panel-title">Filter</h3>
+                    </div>
+                    <div className="panel-body">
+                        <div className="form-group">
+                            <label htmlFor="maxPrice">Max Price</label>
+                            <input type="number" className="form-control" id="maxPrice" name="maxPrice"
+                                   value={this.props.maxPrice} onChange={this.props.handleChange}/>
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="sortBy">Sort By</label>
+                            <select className="form-control" id="sortBy" name="sortBy"
+                                    value={this.props.sortBy} onChange={this.props.handleChange}>
+                                <option value="">Select</option>
+                                <option value="price-asc">Ascending Price</option>
+                                <option value="price-desc">Descending Price</option>
+                                <option value="date-asc">Most Recent</option>
+                                <option value="date-desc">Oldest</option>
+                            </select>
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="brand">Brand</label>
+                            <select className="form-control" id="brand" name="brand"
+                                    value={this.props.brand} onChange={this.props.handleChange}>
+                                <option value="">Select</option>
+                                {this.props.availableBrands.map(brand =>
+                                    <option key={brand} value={brand}>{brand}</option>
+                                )}
+                            </select>
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="limit">Limit</label>
+                            <select className="form-control" id="limit" name="limit"
+                                    value={this.props.limit} onChange={this.props.handleChange}>
+                                <option value="">Select</option>
+                                <option value="12">12</option>
+                                <option value="24">24</option>
+                                <option value="48">48</option>
+                            </select>
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="page">Page</label>
+                            <select className="form-control" id="page" name="page"
+                                    value={this.props.page} onChange={this.props.handleChange}>
+                                <option value="">Select</option>
+                                {Array.from(Array(this.props.availablePages), (x, i) => i + 1).map(page =>
+                                    <option key={page} value={page}>{page}</option>
+                                )}
+
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+    }
+
+    ReactDOM.render(<App/>, document.getElementById('app'));
+</script>
+
 </body>
 </html>
