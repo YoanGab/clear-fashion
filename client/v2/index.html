@@ -19,7 +19,7 @@
             super(props);
             this.state = {
                 products: [],
-                maxPrice: -1,
+                maxPrice: null,
                 sortBy: '',
                 brand: 'All brands',
                 limit: 12,
@@ -52,6 +52,9 @@
         handleChange(event) {
             if (event.target.name !== 'page') {
                 this.setState({page: 1});
+            }
+            if (event.target.name === 'maxPrice') {
+                event.target.value = event.target.value > 0 ? event.target.value : null;
             }
             this.setState({
                 [event.target.name]: event.target.value
@@ -161,7 +164,6 @@
                             <label htmlFor="sortBy">Sort By</label>
                             <select className="form-control" id="sortBy" name="sortBy"
                                     value={this.props.sortBy} onChange={this.props.handleChange}>
-                                <option value="">Select</option>
                                 <option value="price-asc">Ascending Price</option>
                                 <option value="price-desc">Descending Price</option>
                                 <option value="date-asc">Most Recent</option>
@@ -172,7 +174,7 @@
                             <label htmlFor="brand">Brand</label>
                             <select className="form-control" id="brand" name="brand"
                                     value={this.props.brand} onChange={this.props.handleChange}>
-                                <option value="">Select</option>
+                                <option value="">All brands</option>
                                 {this.props.availableBrands.map(brand =>
                                     <option key={brand} value={brand}>{brand}</option>
                                 )}
@@ -182,7 +184,6 @@
                             <label htmlFor="limit">Limit</label>
                             <select className="form-control" id="limit" name="limit"
                                     value={this.props.limit} onChange={this.props.handleChange}>
-                                <option value="">Select</option>
                                 <option value="12">12</option>
                                 <option value="24">24</option>
                                 <option value="48">48</option>
